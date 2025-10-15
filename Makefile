@@ -12,7 +12,7 @@ PACKAGE_SRC_TAR_PATH=$(PACKAGE_BUILD_PATH)/$(PACKAGE_SRC_TAR_NAME)
 
 DKMS_BUILD_PATH=$(PACKAGE_BUILD_PATH)/$(DKMS_PACKAGE)
 DKMS_BUILD_DEBIAN_PATH=$(DKMS_BUILD_PATH)/DEBIAN
-DKMS_BUILD_USR_SRC_PATH=$(DKMS_BUILD_PATH)/usr/src/etherlab-ethercat-$(PACKAGE_VERSION)
+DKMS_BUILD_USR_SRC_PATH=$(DKMS_BUILD_PATH)/usr/src/$(DKMS_PACKAGE)-$(PACKAGE_VERSION)
 
 UTILS_BUILD_PATH=$(PACKAGE_BUILD_PATH)/$(UTILS_PACKAGE)
 UTILS_BUILD_SRC_PATH=$(PACKAGE_BUILD_PATH)/src
@@ -65,7 +65,7 @@ dkms: "$(DKMS_DEB_PATH)"
 			--prefix=/usr \
 			--with-systemdsystemunitdir=/usr/lib/systemd/system \
 			--enable-kernel=no --enable-generic=no --enable-8139too=no \
-			--enable-tool=yes --enable-userlib=yes; \
+			--enable-tool=yes --enable-userlib=yes --disable-initrd; \
 		make -j$(BUILD_JOBS) DESTDIR="$(UTILS_BUILD_PATH)/" install;
 	
 	install -Dm 0644 $(WORKING_DIR)/99-EtherCAT.rules "$(UTILS_BUILD_PATH)/usr/lib/udev/rules.d/99-EtherCAT.rules"

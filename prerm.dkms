@@ -1,2 +1,3 @@
 #!/bin/bash
+set -e
 dkms remove -m etherlab-ethercat-dkms/#PACKAGE_VERSION# --all
