@@ -74,6 +74,7 @@ dkms: "$(DKMS_DEB_PATH)"
 	
 	mkdir -p "$(UTILS_BUILD_DEBIAN_PATH)"
 	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/control.utils" > "$(UTILS_BUILD_DEBIAN_PATH)/control";
+	cp "$(WORKING_DIR)/conffiles.utils" "$(UTILS_BUILD_DEBIAN_PATH)/conffiles"
 	cp "$(WORKING_DIR)/prerm.utils" "$(UTILS_BUILD_DEBIAN_PATH)/prerm"
 	chmod +x "$(UTILS_BUILD_DEBIAN_PATH)/prerm";
 
