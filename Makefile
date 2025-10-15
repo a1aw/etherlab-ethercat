@@ -62,6 +62,7 @@ dkms: "$(DKMS_DEB_PATH)"
 	mkdir -p "$(UTILS_BUILD_PATH)"
 	cd $(UTILS_BUILD_SRC_PATH); \
 		./configure \
+			--prefix=/ \
 			--with-systemdsystemunitdir=/usr/lib/systemd/system \
 			--enable-kernel=no --enable-generic=no --enable-8139too=no \
 			--enable-tool=yes --enable-userlib=yes --disable-initrd; \
