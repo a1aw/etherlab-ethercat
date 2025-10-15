@@ -7,4 +7,4 @@ Description: Tools for IgH EtherCAT(R) Master component
 License: LGPL-2.1-only
 Maintainer: Anthony Law <12967084+a1aw@users.noreply.github.com>
 Homepage: https://etherlab.org
-Depends: linux-headers
+Depends: linux-headers, etherlab-ethercat
