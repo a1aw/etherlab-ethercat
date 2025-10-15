@@ -7,6 +7,6 @@ Description: Kernel modules for IgH EtherCAT(R) Master component
 License: GPL-2.0-only
 Maintainer: Anthony Law <12967084+a1aw@users.noreply.github.com>
 Homepage: https://etherlab.org
-Depends: dkms, etherlab-ethercat-tools
+Depends: dkms, etherlab-ethercat-utils
 Conflicts: etherlab-ethercat
 Provides: etherlab-ethercat

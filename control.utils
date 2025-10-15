@@ -1,5 +1,8 @@
-Package: etherlab-ethercat-tools
+Package: etherlab-ethercat-utils
 Version: #PACKAGE_VERSION#
+Section: misc
+Priority: optional
+Architecture: all
 Description: Tools for IgH EtherCAT(R) Master component
 License: LGPL-2.1-only
 Maintainer: Anthony Law <12967084+a1aw@users.noreply.github.com>
