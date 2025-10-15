@@ -45,16 +45,16 @@ dkms: "$(DKMS_DEB_PATH)"
 "$(DKMS_DEB_PATH)": "$(PACKAGE_SRC_TAR_PATH)"
 	mkdir -p "$(DKMS_BUILD_USR_SRC_PATH)";
 	tar -xf "$(PACKAGE_SRC_TAR_PATH)" --strip-components=1 -C "$(DKMS_BUILD_USR_SRC_PATH)";
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" $(WORKING_DIR)/dkms.conf > "$(DKMS_BUILD_USR_SRC_PATH)/dkms.conf";
+	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/dkms.conf" > "$(DKMS_BUILD_USR_SRC_PATH)/dkms.conf";
 
 	mkdir -p "$(DKMS_BUILD_DEBIAN_PATH)"
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" $(WORKING_DIR)/control.dkms > "$(DKMS_BUILD_DEBIAN_PATH)/control";
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" $(WORKING_DIR)/postinst.dkms > "$(DKMS_BUILD_DEBIAN_PATH)/postinst";
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" $(WORKING_DIR)/prerm.dkms > "$(DKMS_BUILD_DEBIAN_PATH)/prerm";
+	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/control.dkms" > "$(DKMS_BUILD_DEBIAN_PATH)/control";
+	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/postinst.dkms" > "$(DKMS_BUILD_DEBIAN_PATH)/postinst";
+	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/prerm.dkms" > "$(DKMS_BUILD_DEBIAN_PATH)/prerm";
 	chmod +x "$(DKMS_BUILD_DEBIAN_PATH)/postinst";
 	chmod +x "$(DKMS_BUILD_DEBIAN_PATH)/prerm";
 
-	dpkg-deb --build $(DKMS_BUILD_PATH) $(DKMS_DEB_PATH);
+	dpkg-deb --build "$(DKMS_BUILD_PATH)" "$(DKMS_DEB_PATH)";
 
 "$(UTILS_DEB_PATH)": "$(PACKAGE_SRC_TAR_PATH)"
 	mkdir -p "$(UTILS_BUILD_SRC_PATH)";
@@ -73,6 +73,8 @@ dkms: "$(DKMS_DEB_PATH)"
 	install -Dm 0644 $(WORKING_DIR)/ethercat.sysusers.conf "$(UTILS_BUILD_PATH)/usr/lib/sysusers.d/ethercat.conf"
 	
 	mkdir -p "$(UTILS_BUILD_DEBIAN_PATH)"
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" $(WORKING_DIR)/control.utils > "$(UTILS_BUILD_DEBIAN_PATH)/control";
+	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/control.utils" > "$(UTILS_BUILD_DEBIAN_PATH)/control";
+	cp "$(WORKING_DIR)/prerm.utils" "$(UTILS_BUILD_DEBIAN_PATH)/prerm"
+	chmod +x "$(UTILS_BUILD_DEBIAN_PATH)/prerm";
 
-	dpkg-deb --build $(UTILS_BUILD_PATH) $(UTILS_DEB_PATH);
+	dpkg-deb --build "$(UTILS_BUILD_PATH)" "$(UTILS_DEB_PATH)";
