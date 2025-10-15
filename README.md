@@ -26,8 +26,10 @@ sudo apt install build-essentials linux-headers dkms -y
 
 2. Build debs
 ```bash
+git clone https://github.com/a1aw/etherlab-ethercat.git
+cd etherlab-ethercat
 make all
-# to build separately, you could:
+# Or, to build separately, you could:
 # make utils
 # make dkms
 ```
