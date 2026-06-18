@@ -1,81 +1,36 @@
-PACKAGE_PREFIX=etherlab-ethercat
-PACKAGE_VERSION=1.6.8
-ARCH=$(shell dpkg --print-architecture)
+ARCH ?= $(shell dpkg --print-architecture)
+WORKING_DIR := $(shell pwd)
+BUILD_DIR := $(WORKING_DIR)/build
 
-DKMS_PACKAGE=$(PACKAGE_PREFIX)-dkms
-UTILS_PACKAGE=$(PACKAGE_PREFIX)-utils
+DEB_VERSION := $(shell dpkg-parsechangelog --show-field Version -l$(WORKING_DIR)/debian/changelog)
+UPSTREAM_VERSION := $(shell echo $(DEB_VERSION) | sed 's/-.*//')
+DEB_SRC_DIR := $(BUILD_DIR)/etherlab-ethercat-$(UPSTREAM_VERSION)
+ORIG_TAR := $(BUILD_DIR)/etherlab-ethercat_$(UPSTREAM_VERSION).orig.tar.bz2
+UPSTREAM_URL := https://gitlab.com/etherlab.org/ethercat/-/releases/$(UPSTREAM_VERSION)/downloads/dist-tarballs/ethercat.tar.bz2
 
-WORKING_DIR=$(shell pwd)
-BUILD_PATH=$(WORKING_DIR)/build
-PACKAGE_BUILD_PATH=$(BUILD_PATH)/$(PACKAGE_PREFIX)_$(PACKAGE_VERSION)_$(ARCH)
+.PHONY: all clean source
 
-PACKAGE_SRC_TAR_NAME=ethercat.tar.bz2
-PACKAGE_SRC_TAR_PATH=$(PACKAGE_BUILD_PATH)/$(PACKAGE_SRC_TAR_NAME)
-
-DKMS_BUILD_PATH=$(PACKAGE_BUILD_PATH)/$(DKMS_PACKAGE)
-DKMS_BUILD_DEBIAN_PATH=$(DKMS_BUILD_PATH)/DEBIAN
-DKMS_BUILD_USR_SRC_PATH=$(DKMS_BUILD_PATH)/usr/src/$(DKMS_PACKAGE)-$(PACKAGE_VERSION)
-
-UTILS_BUILD_PATH=$(PACKAGE_BUILD_PATH)/$(UTILS_PACKAGE)
-UTILS_BUILD_SRC_PATH=$(PACKAGE_BUILD_PATH)/src
-UTILS_BUILD_DEBIAN_PATH=$(UTILS_BUILD_PATH)/DEBIAN
-
-DKMS_DEB_PATH=$(BUILD_PATH)/$(DKMS_PACKAGE)_$(PACKAGE_VERSION)_$(ARCH).deb
-UTILS_DEB_PATH=$(BUILD_PATH)/$(UTILS_PACKAGE)_$(PACKAGE_VERSION)_$(ARCH).deb
-
-BUILD_JOBS=$(shell nproc)
-
-.PHONY: all clean utils dkms
-
-all: "$(DKMS_DEB_PATH)" "$(UTILS_DEB_PATH)"
+all: $(BUILD_DIR)/.built
 
 clean:
-	rm -rf $(BUILD_PATH);
+	rm -rf $(BUILD_DIR)
 
-utils: "$(UTILS_DEB_PATH)"
+source: $(ORIG_TAR)
+	cd $(BUILD_DIR) && dpkg-buildpackage -S -us -uc
 
-dkms: "$(DKMS_DEB_PATH)"
+$(ORIG_TAR):
+	mkdir -p $(BUILD_DIR)
+	if [ ! -f "$(ORIG_TAR)" ]; then \
+		wget -O "$(ORIG_TAR)" "$(UPSTREAM_URL)"; \
+	fi
 
-"$(PACKAGE_SRC_TAR_PATH)":
-	mkdir -p "$(PACKAGE_BUILD_PATH)";
-	if [ ! -f "$(PACKAGE_SRC_TAR_PATH)" ]; then \
-		wget -O "$(PACKAGE_SRC_TAR_PATH)" https://gitlab.com/etherlab.org/ethercat/-/releases/$(PACKAGE_VERSION)/downloads/dist-tarballs/ethercat.tar.bz2; \
-	fi;
+$(DEB_SRC_DIR)/debian/rules: $(ORIG_TAR) debian/rules
+	rm -rf "$(DEB_SRC_DIR)"
+	mkdir -p "$(DEB_SRC_DIR)"
+	tar -xf "$(ORIG_TAR)" --strip-components=1 -C "$(DEB_SRC_DIR)"
+	cp -a debian "$(DEB_SRC_DIR)/"
+	chmod +x "$(DEB_SRC_DIR)/debian/rules" "$(DEB_SRC_DIR)/debian/etherlab-ethercat-utils.prerm"
 
-"$(DKMS_DEB_PATH)": "$(PACKAGE_SRC_TAR_PATH)"
-	mkdir -p "$(DKMS_BUILD_USR_SRC_PATH)";
-	tar -xf "$(PACKAGE_SRC_TAR_PATH)" --strip-components=1 -C "$(DKMS_BUILD_USR_SRC_PATH)";
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/dkms.conf" > "$(DKMS_BUILD_USR_SRC_PATH)/dkms.conf";
-
-	mkdir -p "$(DKMS_BUILD_DEBIAN_PATH)"
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/control.dkms" > "$(DKMS_BUILD_DEBIAN_PATH)/control";
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/postinst.dkms" > "$(DKMS_BUILD_DEBIAN_PATH)/postinst";
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/prerm.dkms" > "$(DKMS_BUILD_DEBIAN_PATH)/prerm";
-	chmod +x "$(DKMS_BUILD_DEBIAN_PATH)/postinst";
-	chmod +x "$(DKMS_BUILD_DEBIAN_PATH)/prerm";
-
-	dpkg-deb --build "$(DKMS_BUILD_PATH)" "$(DKMS_DEB_PATH)";
-
-"$(UTILS_DEB_PATH)": "$(PACKAGE_SRC_TAR_PATH)"
-	mkdir -p "$(UTILS_BUILD_SRC_PATH)";
-	tar -xf "$(PACKAGE_SRC_TAR_PATH)" --strip-components=1 -C "$(UTILS_BUILD_SRC_PATH)";
-
-	mkdir -p "$(UTILS_BUILD_PATH)"
-	cd $(UTILS_BUILD_SRC_PATH); \
-		./configure \
-			--prefix=/usr --libdir=/usr/lib --sysconfdir=/etc \
-			--with-systemdsystemunitdir=/usr/lib/systemd/system \
-			--enable-kernel=no --enable-generic=no --enable-8139too=no \
-			--enable-tool=yes --enable-userlib=yes --disable-initrd; \
-		make -j$(BUILD_JOBS) DESTDIR="$(UTILS_BUILD_PATH)/" install;
-	
-	install -Dm 0644 $(WORKING_DIR)/99-EtherCAT.rules "$(UTILS_BUILD_PATH)/usr/lib/udev/rules.d/99-EtherCAT.rules"
-	install -Dm 0644 $(WORKING_DIR)/ethercat.sysusers.conf "$(UTILS_BUILD_PATH)/usr/lib/sysusers.d/ethercat.conf"
-	
-	mkdir -p "$(UTILS_BUILD_DEBIAN_PATH)"
-	sed -e "s/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/" "$(WORKING_DIR)/control.utils" > "$(UTILS_BUILD_DEBIAN_PATH)/control";
-	cp "$(WORKING_DIR)/conffiles.utils" "$(UTILS_BUILD_DEBIAN_PATH)/conffiles"
-	cp "$(WORKING_DIR)/prerm.utils" "$(UTILS_BUILD_DEBIAN_PATH)/prerm"
-	chmod +x "$(UTILS_BUILD_DEBIAN_PATH)/prerm";
-
-	dpkg-deb --build "$(UTILS_BUILD_PATH)" "$(UTILS_DEB_PATH)";
+$(BUILD_DIR)/.built: $(DEB_SRC_DIR)/debian/rules
+	cd "$(DEB_SRC_DIR)" && fakeroot dpkg-buildpackage -us -uc -b -a$(ARCH)
+	touch "$(BUILD_DIR)/.built"

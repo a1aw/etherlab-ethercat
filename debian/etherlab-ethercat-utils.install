@@ -1,0 +1,5 @@
+usr/bin/ethercat
+usr/sbin/ethercatctl
+etc/ethercat.conf
+usr/lib/systemd/system/ethercat.service
+usr/share/bash-completion/completions/ethercat*

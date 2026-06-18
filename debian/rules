@@ -1,0 +1,51 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/architecture.mk
+
+export DEB_VERSION_UPSTREAM = $(shell dpkg-parsechangelog -SVersion | sed 's/-[^-]*$$//')
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@ --with dkms
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--prefix=/usr \
+		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
+		--sysconfdir=/etc \
+		--with-systemdsystemunitdir=/usr/lib/systemd/system \
+		--enable-kernel=no \
+		--enable-generic=no \
+		--enable-8139too=no \
+		--enable-tool=yes \
+		--enable-userlib=yes \
+		--enable-fakeuserlib=yes \
+		--enable-initd=no
+
+override_dh_install:
+	dh_install
+	install -d debian/etherlab-ethercat-dkms/usr/src/etherlab-ethercat-dkms-$(DEB_VERSION_UPSTREAM)
+	tar -cf - \
+		--exclude=./debian \
+		--exclude=./examples \
+		--exclude='*.o' \
+		--exclude='*.ko' \
+		--exclude='*.a' \
+		--exclude='*.la' \
+		--exclude='*.so' \
+		--exclude='*.so.*' \
+		--exclude='*/.libs' \
+		--exclude='*~' \
+		--exclude=./tool/ethercat \
+		. \
+		| tar -xf - -C debian/etherlab-ethercat-dkms/usr/src/etherlab-ethercat-dkms-$(DEB_VERSION_UPSTREAM)
+	install -D -m 0644 debian/extras/99-EtherCAT.rules \
+		debian/etherlab-ethercat-utils/usr/lib/udev/rules.d/99-EtherCAT.rules
+	install -D -m 0644 debian/extras/ethercat.sysusers.conf \
+		debian/etherlab-ethercat-utils/usr/lib/sysusers.d/ethercat.conf
+
+override_dh_dkms:
+	dh_dkms -V $(DEB_VERSION_UPSTREAM) -p etherlab-ethercat-dkms
+
+override_dh_missing:
+	dh_missing --fail-missing

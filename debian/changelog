@@ -1,0 +1,14 @@
+etherlab-ethercat (1.6.8-2) unstable; urgency=medium
+
+  * Build libfakeethercat with --enable-fakeuserlib and ship it in
+    etherlab-ethercat.
+
+ -- Anthony Law <12967084+a1aw@users.noreply.github.com>  Thu, 18 Jun 2026 12:00:00 +0000
+
+etherlab-ethercat (1.6.8-1) unstable; urgency=medium
+
+  * Initial Debian packaging using debhelper and dh-dkms.
+  * Split packages: etherlab-ethercat, etherlab-ethercat-dev,
+    etherlab-ethercat-dkms, and etherlab-ethercat-utils.
+
+ -- Anthony Law <12967084+a1aw@users.noreply.github.com>  Mon, 15 Jun 2026 12:00:00 +0000

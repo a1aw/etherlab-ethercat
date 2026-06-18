@@ -1,1 +1,6 @@
 build
+*.buildinfo
+*.changes
+*.dsc
+*.debian.tar.*
+*.upload

@@ -1,0 +1,55 @@
+Source: etherlab-ethercat
+Section: misc
+Priority: optional
+Maintainer: Anthony Law <12967084+a1aw@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-dkms,
+               dkms,
+               autoconf,
+               automake,
+               libtool,
+               pkg-config,
+               build-essential,
+               librtipc-dev,
+               systemd
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://etherlab.org
+Vcs-Git: https://github.com/a1aw/etherlab-ethercat.git
+Vcs-Browser: https://github.com/a1aw/etherlab-ethercat
+
+Package: etherlab-ethercat
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: etherlab-ethercat-dkms
+Description: IgH EtherCAT userspace runtime library
+ Shared library for applications using the IgH EtherCAT master
+ userspace API. Also includes libfakeethercat for dry-run and simulation
+ without a configured master or attached slaves.
+
+Package: etherlab-ethercat-dev
+Architecture: any
+Multi-Arch: same
+Depends: etherlab-ethercat (= ${binary:Version}),
+         ${misc:Depends}
+Description: Headers and development files for IgH EtherCAT userspace library
+ Headers, static library, pkg-config, and CMake files for building
+ applications against libethercat.
+
+Package: etherlab-ethercat-dkms
+Architecture: all
+Depends: ${misc:Depends}, dkms
+Recommends: linux-headers-amd64 | linux-headers-arm64 | linux-headers-generic | linux-headers
+Description: IgH EtherCAT kernel modules (DKMS)
+ Kernel module sources for the IgH EtherCAT master, built automatically
+ on the target system via DKMS.
+
+Package: etherlab-ethercat-utils
+Architecture: any
+Depends: etherlab-ethercat (= ${binary:Version}),
+         ${shlibs:Depends},
+         ${misc:Depends}
+Description: Tools and configuration for IgH EtherCAT master
+ Command-line tools, configuration files, systemd unit, and udev rules
+ for the IgH EtherCAT master.

@@ -1,4 +1,0 @@
-#!/bin/bash
-set -e
-dkms build -m etherlab-ethercat-dkms/#PACKAGE_VERSION#
-dkms install -m etherlab-ethercat-dkms/#PACKAGE_VERSION#
